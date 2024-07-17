@@ -66,7 +66,7 @@ const app = {
     ],
     render: function () {
         let html = this.songs.map(function (song) {
-            return`
+            return `
             <div class="song">
                 <div class="thumb" style="background-image: url('${song.image}')">
                 </div>
@@ -82,7 +82,20 @@ const app = {
         }).join('')
         $('.playlist').innerHTML = html
     },
+    handleEventListener: function(){
+        const cd = $('.cd') 
+        const cdOffsetWidth = cd.offsetWidth
+        document.onscroll = function () {
+            const scroll = window.scrollY || document.documentElement.scrollTop;
+            const newWidth = cdOffsetWidth - scroll
+
+            cd.style.width = newWidth > 0 ? newWidth + "px" : 0
+            cd.style.opacity = newWidth / cdOffsetWidth
+        }
+    }
+    ,
     start: function () {
+        this.handleEventListener();
         this.render();
     }
 }
