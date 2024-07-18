@@ -1,7 +1,20 @@
 const $ = document.querySelector.bind(document)
 const $$ = document.querySelectorAll.bind(document)
+const cd = $('.cd')
+const header = $('header h2')
+const audio = $('#audio')
+const cdThumbnail = $('.cd-thumb')
+const playBtn = $('.btn-toggle-play')
 
 const app = {
+    currentIndex: 0,
+    defineProperties: function () {
+        Object.defineProperty(this, 'currentSong', {
+            get: function () {
+                return this.songs[this.currentIndex]
+            }
+        })
+    },
     songs: [
         {
             name: 'Ai mà biết được',
@@ -64,6 +77,21 @@ const app = {
             image: './assets/img/song10.png',
         },
     ],
+    loadCurrentSong: function () {
+        const html = function () {
+            const currentSong = app.currentSong;
+           
+
+            header.textContent = currentSong.name
+            audio.src = currentSong.path
+            cdThumbnail.style.backgroundImage = `url('${currentSong.image}')`
+
+            
+        }
+        html()
+        // $('.dashboard').innerHTML = html
+    }
+    ,
     render: function () {
         let html = this.songs.map(function (song) {
             return `
@@ -82,9 +110,10 @@ const app = {
         }).join('')
         $('.playlist').innerHTML = html
     },
-    handleEventListener: function(){
-        const cd = $('.cd') 
-        const cdOffsetWidth = cd.offsetWidth
+    handleEventListener: function () {
+        const cdOffsetWidth = cd?.offsetWidth
+
+        //Handle scroll
         document.onscroll = function () {
             const scroll = window.scrollY || document.documentElement.scrollTop;
             const newWidth = cdOffsetWidth - scroll
@@ -92,11 +121,20 @@ const app = {
             cd.style.width = newWidth > 0 ? newWidth + "px" : 0
             cd.style.opacity = newWidth / cdOffsetWidth
         }
+
+        //Handle click play
     }
     ,
     start: function () {
+        this.defineProperties();
+
         this.handleEventListener();
+
+        this.loadCurrentSong();
+
         this.render();
+
+
     }
 }
 
