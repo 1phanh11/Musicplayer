@@ -4,10 +4,14 @@ const cd = $('.cd')
 const header = $('header h2')
 const audio = $('#audio')
 const cdThumbnail = $('.cd-thumb')
+
 const playBtn = $('.btn-toggle-play')
+const playerSong = $('.player')
+const progressSong = $('#progress')
 
 const app = {
     currentIndex: 0,
+    isPlaying: false,
     defineProperties: function () {
         Object.defineProperty(this, 'currentSong', {
             get: function () {
@@ -123,6 +127,39 @@ const app = {
         }
 
         //Handle click play
+        
+        playBtn.onclick = function () {
+            if(app.isPlaying){
+                audio.pause();
+            }else{
+                audio.play();
+            }
+        }
+
+        //Handle play song
+        audio.onplay = function () {
+            app.isPlaying = true;
+            playerSong.classList.add('playing');
+        }
+
+        //Handle pause song
+        audio.onpause = function () {
+            app.isPlaying = false;
+            playerSong.classList.remove('playing');
+        }
+
+        //Handle progress bar
+        audio.ontimeupdate = function () {
+            if(audio.duration){
+                progressSong.value = Math.floor(audio.currentTime / audio.duration * 100)
+            }
+        }
+
+        //Handle seek music bar
+        progress.onchange = function (element) {
+            const seekTime = element.target.value * (audio.duration / 100);
+            audio.currentTime = seekTime
+        }
     }
     ,
     start: function () {
