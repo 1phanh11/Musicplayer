@@ -156,7 +156,7 @@ const app = {
         }
 
         //Handle seek music bar
-        progress.onchange = function (element) {
+        progressSong.oninput = function (element) {
             const seekTime = element.target.value * (audio.duration / 100);
             audio.currentTime = seekTime
         }
