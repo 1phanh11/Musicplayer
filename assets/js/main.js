@@ -9,13 +9,16 @@ const playBtn = $('.btn-toggle-play')
 const nextBtn = $('.btn-next')
 const prevBtn = $('.btn-prev')
 const randomBtn = $('.btn-random')
+const repeatBtn = $('.btn-repeat')
 const playerSong = $('.player')
 const progressSong = $('#progress')
+
 
 const app = {
     currentIndex: 0,
     isPlaying: false,
     isRandom: false,
+    isLoop: false,
     defineProperties: function () {
         Object.defineProperty(this, 'currentSong', {
             get: function () {
@@ -24,7 +27,7 @@ const app = {
         })
     },
 
-   
+
     songs: [
         {
             name: 'Ai mà biết được',
@@ -88,31 +91,36 @@ const app = {
         },
     ],
     loadCurrentSong: function () {
-        
+        if ($('.song.active')) {
+            $('.song.active').classList.remove('active')
+        }
         const currentSong = app.currentSong;
         header.textContent = currentSong.name
         audio.src = currentSong.path
         cdThumbnail.style.backgroundImage = `url('${currentSong.image}')`
-        
+        $(`#idsong-${this.currentIndex}`).classList.add('active')
     }
     ,
     loadNextSong: function () {
-        if(this.currentIndex < this.songs.length - 1){
+        if (this.currentIndex < this.songs.length - 1) {
             this.currentIndex++;
-        }else{
+        } else {
             this.currentIndex = 0;
         }
         this.loadCurrentSong();
+        audio.play()
     },
     loadPreviousSong: function () {
-        if(this.currentIndex == 0){
+        if (this.currentIndex == 0) {
             this.currentIndex = this.songs.length - 1
-        }else{
+        } else {
             this.currentIndex--;
         }
         this.loadCurrentSong();
+        audio.play()
     },
-    randomSong : function () {
+    randomSong: function () {
+
         let randomIndex
         do {
             randomIndex = Math.floor(Math.random() * 10)
@@ -120,15 +128,14 @@ const app = {
         this.currentIndex = randomIndex;
         console.log(this.currentIndex);
         this.loadCurrentSong();
+        audio.play()
     }
-
-
     ,
     render: function () {
-        let html = this.songs.map(function (song) {
+        let html = this.songs.map(function (song, index) {
             return `
-            <div class="song">
-                <div class="thumb" style="background-image: url('${song.image}')">
+            <div id="idsong-${index}" class="song">
+                <div  class="thumb" style="background-image: url('${song.image}')">
                 </div>
                 <div class="body">
                 <h3 class="title">${song.name}</h3>
@@ -144,9 +151,9 @@ const app = {
     },
     handleEventListener: function () {
         const cdOffsetWidth = cd?.offsetWidth
-        
+
         //create object cd animate rotate 360 degree
-        const cdThumbNailAnimation = cdThumbnail.animate({rotate: '360deg'}, {duration: 10000, iterations: Infinity})
+        const cdThumbNailAnimation = cdThumbnail.animate({ rotate: '360deg' }, { duration: 10000, iterations: Infinity })
         cdThumbNailAnimation.pause()
 
         //Handle scroll
@@ -158,7 +165,7 @@ const app = {
             cd.style.opacity = newWidth / cdOffsetWidth
         }
 
-       
+
         //Handle play song
         audio.onplay = function () {
             app.isPlaying = true;
@@ -171,10 +178,24 @@ const app = {
             playerSong.classList.remove('playing');
         }
 
+        //Next when song ended
+        audio.onended = function () {
+            if (app.isLoop) {
+                audio.play()
+                return
+            }
+            if (app.isRandom) {
+                app.randomSong()
+
+            } else {
+                app.loadNextSong()
+            }
+        }
+
 
         //Handle progress bar
         audio.ontimeupdate = function () {
-            if(audio.duration){
+            if (audio.duration) {
                 progressSong.value = Math.floor(audio.currentTime / audio.duration * 100)
             }
         }
@@ -185,13 +206,13 @@ const app = {
             audio.currentTime = seekTime
         }
 
-         //Handle click play
-        
-         playBtn.onclick = function () {
-            if(app.isPlaying){
+        //Handle click play
+
+        playBtn.onclick = function () {
+            if (app.isPlaying) {
                 audio.pause();
                 cdThumbNailAnimation.pause()
-            }else{
+            } else {
                 audio.play();
                 cdThumbNailAnimation.play()
             }
@@ -199,23 +220,21 @@ const app = {
 
         //Next song handle click
         nextBtn.onclick = function () {
-            if(app.isRandom){
+            if (app.isRandom) {
                 app.randomSong()
-            }else{
+            } else {
                 app.loadNextSong();
             }
-            audio.play();
             cdThumbNailAnimation.play()
         }
 
         //Previous song handle click
         prevBtn.onclick = function () {
-            if(app.isRandom){
+            if (app.isRandom) {
                 app.randomSong();
-            }else{
+            } else {
                 app.loadPreviousSong();
             }
-            audio.play();
             cdThumbNailAnimation.play()
 
         }
@@ -225,6 +244,12 @@ const app = {
             app.isRandom = !app.isRandom
             this.classList.toggle('active', app.isRandom)
         }
+
+        //Repeat song handle click
+        repeatBtn.onclick = function () {
+            app.isLoop = !app.isLoop
+            this.classList.toggle('active', app.isLoop)
+        }
     }
     ,
     start: function () {
@@ -232,9 +257,10 @@ const app = {
 
         this.handleEventListener();
 
+        this.render();
+
         this.loadCurrentSong();
 
-        this.render();
 
 
     }
