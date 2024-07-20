@@ -97,10 +97,10 @@ const app = {
     }
     ,
     loadNextSong: function () {
-        if(this.currentIndex >= this.songs.length){
-            this.currentIndex = 0
+        if(this.currentIndex < this.songs.length - 1){
+            this.currentIndex++;
         }else{
-            this.currentIndex++
+            this.currentIndex = 0
         }
         this.loadCurrentSong()
     },
@@ -149,27 +149,7 @@ const app = {
             cd.style.opacity = newWidth / cdOffsetWidth
         }
 
-        //Handle click play
-        
-        playBtn.onclick = function () {
-            if(app.isPlaying){
-                audio.pause();
-                cdThumbNailAnimation.pause()
-            }else{
-                audio.play();
-                cdThumbNailAnimation.play()
-            }
-        }
-
-        //Next song handle click
-        nextBtn.onclick = function () {
-            app.loadNextSong();
-        }
-
-        //Previous song handle click
-        prevBtn.onclick = function () {
-            app.loadPreviousSong();
-        }
+       
         //Handle play song
         audio.onplay = function () {
             app.isPlaying = true;
@@ -194,6 +174,34 @@ const app = {
         progressSong.oninput = function (element) {
             const seekTime = element.target.value * (audio.duration / 100);
             audio.currentTime = seekTime
+        }
+
+         //Handle click play
+        
+         playBtn.onclick = function () {
+            if(app.isPlaying){
+                audio.pause();
+                cdThumbNailAnimation.pause()
+            }else{
+                audio.play();
+                cdThumbNailAnimation.play()
+            }
+        }
+
+        //Next song handle click
+        nextBtn.onclick = function () {
+            app.loadNextSong();
+            audio.play();
+            cdThumbNailAnimation.play()
+
+        }
+
+        //Previous song handle click
+        prevBtn.onclick = function () {
+            app.loadPreviousSong();
+            audio.play();
+            cdThumbNailAnimation.play()
+
         }
     }
     ,
