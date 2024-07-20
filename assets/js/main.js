@@ -19,6 +19,8 @@ const app = {
             }
         })
     },
+
+   
     songs: [
         {
             name: 'Ai mà biết được',
@@ -116,6 +118,10 @@ const app = {
     },
     handleEventListener: function () {
         const cdOffsetWidth = cd?.offsetWidth
+        
+        //create object cd animate rotate 360 degree
+        const cdThumbNailAnimation = cdThumbnail.animate({rotate: '360deg'}, {duration: 10000, iterations: Infinity})
+        cdThumbNailAnimation.pause()
 
         //Handle scroll
         document.onscroll = function () {
@@ -131,10 +137,14 @@ const app = {
         playBtn.onclick = function () {
             if(app.isPlaying){
                 audio.pause();
+                cdThumbNailAnimation.pause()
             }else{
                 audio.play();
+                console.log(cdThumbNailAnimation);
+                cdThumbNailAnimation.play()
             }
         }
+
 
         //Handle play song
         audio.onplay = function () {
