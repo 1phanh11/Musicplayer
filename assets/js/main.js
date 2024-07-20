@@ -8,12 +8,14 @@ const cdThumbnail = $('.cd-thumb')
 const playBtn = $('.btn-toggle-play')
 const nextBtn = $('.btn-next')
 const prevBtn = $('.btn-prev')
+const randomBtn = $('.btn-random')
 const playerSong = $('.player')
 const progressSong = $('#progress')
 
 const app = {
     currentIndex: 0,
     isPlaying: false,
+    isRandom: false,
     defineProperties: function () {
         Object.defineProperty(this, 'currentSong', {
             get: function () {
@@ -86,23 +88,21 @@ const app = {
         },
     ],
     loadCurrentSong: function () {
-        const html = function () {
-            const currentSong = app.currentSong;
-            header.textContent = currentSong.name
-            audio.src = currentSong.path
-            cdThumbnail.style.backgroundImage = `url('${currentSong.image}')`
-        }
-        html()
-        // $('.dashboard').innerHTML = html
+        
+        const currentSong = app.currentSong;
+        header.textContent = currentSong.name
+        audio.src = currentSong.path
+        cdThumbnail.style.backgroundImage = `url('${currentSong.image}')`
+        
     }
     ,
     loadNextSong: function () {
         if(this.currentIndex < this.songs.length - 1){
             this.currentIndex++;
         }else{
-            this.currentIndex = 0
+            this.currentIndex = 0;
         }
-        this.loadCurrentSong()
+        this.loadCurrentSong();
     },
     loadPreviousSong: function () {
         if(this.currentIndex == 0){
@@ -110,7 +110,16 @@ const app = {
         }else{
             this.currentIndex--;
         }
-        this.loadCurrentSong()
+        this.loadCurrentSong();
+    },
+    randomSong : function () {
+        let randomIndex
+        do {
+            randomIndex = Math.floor(Math.random() * 10)
+        } while (randomIndex === this.currentIndex);
+        this.currentIndex = randomIndex;
+        console.log(this.currentIndex);
+        this.loadCurrentSong();
     }
 
 
@@ -190,18 +199,31 @@ const app = {
 
         //Next song handle click
         nextBtn.onclick = function () {
-            app.loadNextSong();
+            if(app.isRandom){
+                app.randomSong()
+            }else{
+                app.loadNextSong();
+            }
+            audio.play();
+            cdThumbNailAnimation.play()
+        }
+
+        //Previous song handle click
+        prevBtn.onclick = function () {
+            if(app.isRandom){
+                app.randomSong();
+            }else{
+                app.loadPreviousSong();
+            }
             audio.play();
             cdThumbNailAnimation.play()
 
         }
 
-        //Previous song handle click
-        prevBtn.onclick = function () {
-            app.loadPreviousSong();
-            audio.play();
-            cdThumbNailAnimation.play()
-
+        //Random song handle click
+        randomBtn.onclick = function () {
+            app.isRandom = !app.isRandom
+            this.classList.toggle('active', app.isRandom)
         }
     }
     ,
