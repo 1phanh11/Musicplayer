@@ -6,6 +6,8 @@ const audio = $('#audio')
 const cdThumbnail = $('.cd-thumb')
 
 const playBtn = $('.btn-toggle-play')
+const nextBtn = $('.btn-next')
+const prevBtn = $('.btn-prev')
 const playerSong = $('.player')
 const progressSong = $('#progress')
 
@@ -86,17 +88,32 @@ const app = {
     loadCurrentSong: function () {
         const html = function () {
             const currentSong = app.currentSong;
-           
-
             header.textContent = currentSong.name
             audio.src = currentSong.path
             cdThumbnail.style.backgroundImage = `url('${currentSong.image}')`
-
-            
         }
         html()
         // $('.dashboard').innerHTML = html
     }
+    ,
+    loadNextSong: function () {
+        if(this.currentIndex >= this.songs.length){
+            this.currentIndex = 0
+        }else{
+            this.currentIndex++
+        }
+        this.loadCurrentSong()
+    },
+    loadPreviousSong: function () {
+        if(this.currentIndex == 0){
+            this.currentIndex = this.songs.length - 1
+        }else{
+            this.currentIndex--;
+        }
+        this.loadCurrentSong()
+    }
+
+
     ,
     render: function () {
         let html = this.songs.map(function (song) {
@@ -140,12 +157,19 @@ const app = {
                 cdThumbNailAnimation.pause()
             }else{
                 audio.play();
-                console.log(cdThumbNailAnimation);
                 cdThumbNailAnimation.play()
             }
         }
 
+        //Next song handle click
+        nextBtn.onclick = function () {
+            app.loadNextSong();
+        }
 
+        //Previous song handle click
+        prevBtn.onclick = function () {
+            app.loadPreviousSong();
+        }
         //Handle play song
         audio.onplay = function () {
             app.isPlaying = true;
@@ -157,6 +181,7 @@ const app = {
             app.isPlaying = false;
             playerSong.classList.remove('playing');
         }
+
 
         //Handle progress bar
         audio.ontimeupdate = function () {
