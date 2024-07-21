@@ -6,12 +6,14 @@ const audio = $('#audio')
 const cdThumbnail = $('.cd-thumb')
 
 const playBtn = $('.btn-toggle-play')
+const playList = $('.playlist')
 const nextBtn = $('.btn-next')
 const prevBtn = $('.btn-prev')
 const randomBtn = $('.btn-random')
 const repeatBtn = $('.btn-repeat')
 const playerSong = $('.player')
 const progressSong = $('#progress')
+const song = $('.song')
 
 
 const app = {
@@ -99,6 +101,7 @@ const app = {
         audio.src = currentSong.path
         cdThumbnail.style.backgroundImage = `url('${currentSong.image}')`
         $(`#idsong-${this.currentIndex}`).classList.add('active')
+        this.scrollToActiveSong()
     }
     ,
     loadNextSong: function () {
@@ -119,6 +122,7 @@ const app = {
         this.loadCurrentSong();
         audio.play()
     },
+    
     randomSong: function () {
 
         let randomIndex
@@ -126,15 +130,24 @@ const app = {
             randomIndex = Math.floor(Math.random() * 10)
         } while (randomIndex === this.currentIndex);
         this.currentIndex = randomIndex;
-        console.log(this.currentIndex);
         this.loadCurrentSong();
         audio.play()
+    }
+    ,
+    scrollToActiveSong: function () {
+        setTimeout(() => {
+            if(cd.style.width == 0){
+                $('.song.active').scrollIntoView({ behavior: "smooth", block: 'end' });
+            }else{
+                $('.song.active').scrollIntoView({ behavior: "smooth", block: 'center' });
+            }
+        }, 350);
     }
     ,
     render: function () {
         let html = this.songs.map(function (song, index) {
             return `
-            <div id="idsong-${index}" class="song">
+            <div id="idsong-${index}" class="song" data-index = ${index}>
                 <div  class="thumb" style="background-image: url('${song.image}')">
                 </div>
                 <div class="body">
@@ -147,7 +160,7 @@ const app = {
             </div>
             `
         }).join('')
-        $('.playlist').innerHTML = html
+        playList.innerHTML = html
     },
     handleEventListener: function () {
         const cdOffsetWidth = cd?.offsetWidth
@@ -250,6 +263,18 @@ const app = {
             app.isLoop = !app.isLoop
             this.classList.toggle('active', app.isLoop)
         }
+
+
+        playList.onclick = function (e) {
+            const songNode = e.target.closest('.song:not(.active)') 
+            if(songNode || e.target.closest('.option')){
+                if(songNode){
+                    app.currentIndex = songNode.dataset.index
+                    app.loadCurrentSong()
+                    audio.play()
+                }
+            }
+        }
     }
     ,
     start: function () {
@@ -260,8 +285,6 @@ const app = {
         this.render();
 
         this.loadCurrentSong();
-
-
 
     }
 }
