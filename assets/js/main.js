@@ -4,6 +4,7 @@ const cd = $('.cd')
 const header = $('header h2')
 const audio = $('#audio')
 const cdThumbnail = $('.cd-thumb')
+const PLAYER_STORAGE_KEY = 'Phanh-playlist'
 
 const playBtn = $('.btn-toggle-play')
 const playList = $('.playlist')
@@ -21,6 +22,11 @@ const app = {
     isPlaying: false,
     isRandom: false,
     isLoop: false,
+    config: JSON.parse(localStorage.getItem(PLAYER_STORAGE_KEY)) || {},
+    setconfig: function(key, value) {
+        this.config[key] = value
+        localStorage.setItem(PLAYER_STORAGE_KEY, JSON.stringify(this.config))
+    },
     defineProperties: function () {
         Object.defineProperty(this, 'currentSong', {
             get: function () {
@@ -122,7 +128,7 @@ const app = {
         this.loadCurrentSong();
         audio.play()
     },
-    
+
     randomSong: function () {
 
         let randomIndex
@@ -136,14 +142,21 @@ const app = {
     ,
     scrollToActiveSong: function () {
         setTimeout(() => {
-            if(cd.style.width == 0){
+            if (cd.style.width == 0) {
                 $('.song.active').scrollIntoView({ behavior: "smooth", block: 'end' });
-            }else{
+            } else {
                 $('.song.active').scrollIntoView({ behavior: "smooth", block: 'center' });
             }
         }, 350);
     }
     ,
+    loadConfigAtStart : function () {
+        this.isLoop = this.config.isLoop
+        this.isRandom = this.config.isRandom
+        randomBtn.classList.toggle('active', this.isRandom)
+        repeatBtn.classList.toggle('active', this.isLoop)
+
+    },
     render: function () {
         let html = this.songs.map(function (song, index) {
             return `
@@ -255,20 +268,23 @@ const app = {
         //Random song handle click
         randomBtn.onclick = function () {
             app.isRandom = !app.isRandom
+            app.setconfig('isRandom', app.isRandom)
             this.classList.toggle('active', app.isRandom)
         }
 
         //Repeat song handle click
         repeatBtn.onclick = function () {
             app.isLoop = !app.isLoop
+            app.setconfig('isLoop', app.isLoop)
             this.classList.toggle('active', app.isLoop)
         }
 
+        
 
         playList.onclick = function (e) {
-            const songNode = e.target.closest('.song:not(.active)') 
-            if(songNode || e.target.closest('.option')){
-                if(songNode){
+            const songNode = e.target.closest('.song:not(.active)')
+            if (songNode || e.target.closest('.option')) {
+                if (songNode) {
                     app.currentIndex = songNode.dataset.index
                     app.loadCurrentSong()
                     audio.play()
@@ -278,6 +294,8 @@ const app = {
     }
     ,
     start: function () {
+        this.loadConfigAtStart();
+
         this.defineProperties();
 
         this.handleEventListener();
